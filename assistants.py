@@ -2,53 +2,105 @@ from openai import OpenAI
 import os
 import config
 import openai
+import time
 
 client = OpenAI(api_key=config.Items.key)
 
 # os.environ["OPENAI_API_KEY"] = config.Items.key
 # Set up OpenAI API key
-#api_key = config.Items.key
+api_key = config.Items.key
 #openai.api_key = api_key
 
-democrat = client.beta.assistants.create(
-    name="Democrat",
-    instructions="You are a democrat. Answer questions as if you are a democrat",
-    tools=[{"type": "code_interpreter"}],
-    model="gpt-3.5-turbo-1106"
-)
+
+#creating assistants. each assistant has their own persona
+# democrat = client.beta.assistants.create(
+#     name="Democrat",
+#     instructions="You are an extreme democrat. Answer questions as if you are a democrat",
+#     tools=[{"type": "code_interpreter"}],
+#     model="gpt-3.5-turbo-1106"
+# )
 
 republican = client.beta.assistants.create(
-    name="Republican",
-    instructions="You are a republican. Answer questions as if you are a republican",
-    tools=[{"type": "code_interpreter"}],
-    model="gpt-3.5-turbo-1106"
+   name="Republican",
+   instructions="You are an extreme republican. You are pro gun rights. Answer the user's questions as if you are a republican",
+   #tools=[{"type": "code_interpreter"}],
+   model="gpt-3.5-turbo-1106"
 )
-#creating thread
-thread = client.beta.threads.create()
 
-message = client.beta.threads.messages.create(
-    thread_id=thread.id,
+# independent = client.beta.assistants.create(
+#    name="Republican",
+#    instructions="You have no political stance. Your opinion is against the two party system. Answer questions as if this is the case.",
+#    tools=[{"type": "code_interpreter"}],
+#    model="gpt-3.5-turbo-1106"
+# )
+
+
+#creating threads for each persona
+# democrat_thread = client.beta.threads.create()
+republican_thread = client.beta.threads.create()
+# independent_thread = client.beta.threads.create()
+
+
+
+#asking republican, democrat, and independent about gun rights opinion
+# independent_message = client.beta.threads.messages.create(
+#     thread_id=independent_thread.id,
+#     role="user",
+#     content="What do you think about gun rights?"
+# )
+
+republican_message = client.beta.threads.messages.create(
+    thread_id=republican_thread.id,
     role="user",
     content="What do you think about gun rights?"
 )
 
+# democrat_message = client.beta.threads.messages.create(
+#     thread_id=democrat_thread.id,
+#     role="user",
+#     content="What do you think about gun rights?"
+# )
 
-democrat_run = client.beta.threads.runs.create(
-  thread_id=thread.id,
-  assistant_id=democrat.id,
-)
+
+
+# democrat_run = client.beta.threads.runs.create(
+#   thread_id=democrat_thread.id,
+#   assistant_id=democrat.id,
+# )
 
 republican_run = client.beta.threads.runs.create(
-  thread_id=thread.id,
+  thread_id=republican_thread.id,
   assistant_id=republican.id,
+  instructions='You are a republican and believe in gun rights. Answer in this way.'
 )
 
-messages = client.beta.threads.messages.list(
-  thread_id=thread.id
-)
 
-for message in messages.data:
-    if message.role == "assistant" and message.assistant_id == democrat.id:
-        print("Democrat Assistant:", message.content)
-    elif message.role == "assistant" and message.assistant_id == republican.id:
-        print("Republican Assistant:", message.content)
+# independent_run = client.beta.threads.runs.create(
+#   thread_id=independent_thread.id,
+#   assistant_id=independent.id,
+# )
+
+
+
+while True:
+    # waiting 2 seconds
+    time.sleep(2)
+
+    # retrieving the messages
+    run_status = client.beta.threads.runs.retrieve(
+        thread_id=republican_thread.id,
+        run_id=republican_run.id
+    )
+    print(run_status.status)
+    if run_status.status == 'completed':
+        messages = client.beta.threads.messages.list(
+        thread_id=republican_thread.id
+    )
+
+    #displaying the messages
+        for message in reversed(messages.data):
+            print(f"{message.role}: {message.content[0].text.value}")
+        break
+    else:
+        print("Waiting for the Assistant...")
+        time.sleep(2)
