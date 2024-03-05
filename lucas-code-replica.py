@@ -1,3 +1,10 @@
+## uncommented code is lucas's with small changes to mimic republican
+## commented code is early attempts to make more assistant/personas, running congruently
+## plan on making less redundant by putting each section (thread creation, assistant creation, runs, etc.) through for loops (for i in range(len(data)) 
+## will also help prepare code to have ANES data input for future
+## error is timeout - infinite loop. stays on "waiting for assistant....". line 101 shows that the run fails.
+
+
 from openai import OpenAI
 import os
 import config
@@ -91,7 +98,7 @@ while True:
         thread_id=republican_thread.id,
         run_id=republican_run.id
     )
-    print(run_status.status)
+    print(run_status.status) ##prints 'failed'
     if run_status.status == 'completed':
         messages = client.beta.threads.messages.list(
         thread_id=republican_thread.id
