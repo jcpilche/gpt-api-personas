@@ -1,3 +1,5 @@
+## no data out of any messages - lines 37 and 57
+
 import os
 import time
 import config
