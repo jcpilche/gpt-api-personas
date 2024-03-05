@@ -1,3 +1,6 @@
+## error at republican run due to attempt to run two things on multiple threads
+## learned that assistant does not answer instantanously. must wait.
+
 from openai import OpenAI
 import os
 import config
